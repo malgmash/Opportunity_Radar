@@ -44,15 +44,44 @@ const WEAK_PHRASES = [
   "travel",
 ];
 
-/** Phrasing varies far more on the "no" side, so these are patterns. */
+/**
+ * Phrasing varies far more on the "no" side ("we aren't able to offer travel
+ * reimbursements this year"), so these are patterns rather than phrases, and
+ * they allow both apostrophe characters.
+ */
 const NEGATIVE_PATTERNS: RegExp[] = [
   /\bno\s+travel\s+(reimbursement|reimbursements|stipend|stipends|grant|grants|funding|support|assistance)\b/,
-  /\b(do|does|will|can|could)\s*n[o']?t\s+(be\s+)?(able\s+to\s+)?(offer|offering|provide|providing|cover|covering|reimburse|reimbursing|fund|funding|sponsor)\b[^.!?]{0,60}\btravel\b/,
-  /\b(unable|not\s+able)\s+to\s+(offer|provide|cover|reimburse|fund)\b[^.!?]{0,60}\btravel\b/,
-  /\btravel\b[^.!?]{0,60}\b(is|are|will)\s+not\s+(be\s+)?(covered|reimbursed|provided|offered|funded)\b/,
+  /(?:\bnot|\bcannot|n['’]t)\s+(?:be\s+)?(?:able\s+to\s+)?(?:offer|provide|cover|reimburse|fund|sponsor)\w*\b[^.!?]{0,60}\btravel\b/,
+  /\b(?:unable|not\s+able)\s+to\s+(?:offer|provide|cover|reimburse|fund)\w*\b[^.!?]{0,60}\btravel\b/,
+  /\btravel\b[^.!?]{0,60}\b(?:is|are|will)\s+not\s+(?:be\s+)?(?:covered|reimbursed|provided|offered|funded)\b/,
   /\btravel\b[^.!?]{0,40}\bat\s+your\s+own\s+expense\b/,
-  /\bnot\s+(offering|providing)\s+travel\b/,
+  /\bnot\s+(?:offering|providing)\s+travel\b/,
+  /\bdoes\s+not\s+include\s+travel\b/,
 ];
+
+/**
+ * Ranks how much a matched sentence actually commits to paying for travel. FAQ
+ * headings and navigation menus match the same keywords as a real policy, so a
+ * weak quote downgrades the finding instead of asserting funding.
+ */
+function scoreQuote(quote: string): number {
+  let score = 0;
+  if (/\b(we|you|attendees|students|participants|applicants|hackers)\b/i.test(quote)) {
+    score += 2;
+  }
+  if (
+    /\b(will|offers?|provides?|covers?|reimburses?|available|apply|eligible|awarded|up to|\$\d)/i.test(
+      quote,
+    )
+  ) {
+    score += 2;
+  }
+  if (/\?\s*$/.test(quote)) score -= 3;
+  if (quote.length < 45) score -= 2;
+  // Flattened navigation reads as many capitalized fragments with no verbs.
+  if (!/[.!?]/.test(quote) && (quote.match(/[A-Z]/g)?.length ?? 0) > 12) score -= 3;
+  return score;
+}
 
 const CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
 const PAGE_BUDGET_BYTES = 900_000;
@@ -79,9 +108,12 @@ function findQuote(text: string, index: number, length: number): string | undefi
   );
   const endMatch = after.match(/[.!?](\s|$)/);
   const end = endMatch ? local + (endMatch.index ?? 0) + 1 : window.length;
+  // With no sentence break to anchor to, keep only a little leading context so
+  // flattened menus do not swamp the quote.
+  const from = start >= 0 ? start + 2 : Math.max(0, local - 60);
 
   const sentence = window
-    .slice(start >= 0 ? start + 2 : 0, end)
+    .slice(from, end)
     // Flattened menus leave runs of bare numbers behind.
     .replace(/(?:\s\d{1,3}){3,}/g, " ")
     .replace(/\s+/g, " ")
@@ -137,6 +169,64 @@ function pageCandidates(baseUrl: string, extraUrls: string[]): string[] {
  * travel. Returns `unknown` rather than guessing when nothing is stated, so the
  * rules engine can route the item to manual verification.
  */
+export interface PageSignals {
+  evidence: TravelEvidence[];
+  negative?: TravelEvidence;
+  weak?: TravelEvidence;
+}
+
+/** Pure text analysis, split out from the fetching so it can be tested directly. */
+export function analyzePageText(text: string, url: string): PageSignals {
+  const lower = text.toLowerCase();
+  const signals: PageSignals = { evidence: [] };
+
+  for (const pattern of NEGATIVE_PATTERNS) {
+    const match = lower.match(pattern);
+    if (match?.index !== undefined && !signals.negative) {
+      signals.negative = {
+        phrase: match[0].replace(/\s+/g, " ").trim(),
+        quote: findQuote(text, match.index, match[0].length) ?? match[0],
+        sourceUrl: url,
+      };
+    }
+  }
+
+  // The first hit is often an FAQ heading while the policy sits a sentence
+  // later, so every occurrence is collected and the clearest one wins.
+  for (const phrase of STRONG_PHRASES) {
+    let index = lower.indexOf(phrase);
+    let seen = 0;
+    while (index >= 0 && seen < 3) {
+      signals.evidence.push({
+        phrase,
+        quote: findQuote(text, index, phrase.length) ?? phrase,
+        sourceUrl: url,
+      });
+      seen += 1;
+      index = lower.indexOf(phrase, index + phrase.length);
+    }
+  }
+
+  const byQuote = new Map(signals.evidence.map((entry) => [entry.quote, entry]));
+  signals.evidence = [...byQuote.values()]
+    .sort((a, b) => scoreQuote(b.quote) - scoreQuote(a.quote))
+    .slice(0, 6);
+
+  for (const phrase of WEAK_PHRASES) {
+    const index = lower.indexOf(phrase);
+    if (index >= 0) {
+      signals.weak = {
+        phrase,
+        quote: findQuote(text, index, phrase.length) ?? phrase,
+        sourceUrl: url,
+      };
+      break;
+    }
+  }
+
+  return signals;
+}
+
 export async function checkTravelSupport(
   baseUrl: string,
   extraUrls: string[] = [],
@@ -152,65 +242,48 @@ export async function checkTravelSupport(
     const page = await loadPage(url);
     if (!page || page.text.length < 200) continue;
     checked.push(url);
-    const lower = page.text.toLowerCase();
 
-    for (const pattern of NEGATIVE_PATTERNS) {
-      const match = lower.match(pattern);
-      if (match?.index !== undefined && !negative) {
-        negative = {
-          phrase: match[0].replace(/\s+/g, " ").trim(),
-          quote: findQuote(page.text, match.index, match[0].length) ?? match[0],
-          sourceUrl: url,
-        };
-      }
-    }
-
-    for (const phrase of STRONG_PHRASES) {
-      const index = lower.indexOf(phrase);
-      if (index >= 0) {
-        evidence.push({
-          phrase,
-          quote: findQuote(page.text, index, phrase.length) ?? phrase,
-          sourceUrl: url,
-        });
-      }
-    }
-
-    if (!weakHit) {
-      for (const phrase of WEAK_PHRASES) {
-        const index = lower.indexOf(phrase);
-        if (index >= 0) {
-          weakHit = {
-            phrase,
-            quote: findQuote(page.text, index, phrase.length) ?? phrase,
-            sourceUrl: url,
-          };
-          break;
-        }
-      }
-    }
+    const signals = analyzePageText(page.text, url);
+    evidence.push(...signals.evidence);
+    negative ??= signals.negative;
+    weakHit ??= signals.weak;
 
     if (evidence.length) break;
   }
 
   const checkedAt = new Date().toISOString();
 
+  const ranked = evidence
+    .map((entry) => ({ entry, score: scoreQuote(entry.quote) }))
+    .sort((a, b) => b.score - a.score);
+
   // A page that both advertises and limits travel funding is not a green light.
-  if (evidence.length && negative) {
+  if (ranked.length && negative) {
     return {
       status: "likely",
-      evidence: [evidence[0], negative],
+      evidence: [ranked[0].entry, negative],
       note: "The site mentions travel funding and also limits it; check who qualifies.",
       checkedAt,
       pagesChecked: checked,
     };
   }
 
-  if (evidence.length) {
+  if (ranked.length) {
+    const best = ranked[0];
+    const host = new URL(best.entry.sourceUrl).hostname;
+    if (best.score < 1) {
+      return {
+        status: "likely",
+        evidence: [best.entry],
+        note: `Mentions travel funding on ${host}, but the page never states the policy outright.`,
+        checkedAt,
+        pagesChecked: checked,
+      };
+    }
     return {
       status: "confirmed",
-      evidence: evidence.slice(0, 3),
-      note: `Found travel funding language on ${new URL(evidence[0].sourceUrl).hostname}.`,
+      evidence: ranked.slice(0, 3).map((item) => item.entry),
+      note: `Found travel funding language on ${host}.`,
       checkedAt,
       pagesChecked: checked,
     };
