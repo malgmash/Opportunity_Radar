@@ -159,7 +159,16 @@ const CITY_ALIASES: Record<string, string> = {
 };
 
 const NON_US_HINTS = [
+  "international",
   "canada",
+  "ontario",
+  "quebec",
+  "british columbia",
+  "alberta",
+  "manitoba",
+  "saskatchewan",
+  "nova scotia",
+  "newfoundland",
   "united kingdom",
   "u.k.",
   "uk",

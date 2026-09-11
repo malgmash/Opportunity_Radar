@@ -44,35 +44,53 @@ const WEAK_PHRASES = [
   "travel",
 ];
 
-const NEGATIVE_PHRASES = [
-  "no travel reimbursement",
-  "not offer travel reimbursement",
-  "do not offer travel",
-  "does not offer travel",
-  "do not provide travel",
-  "does not provide travel",
-  "unable to reimburse travel",
-  "cannot reimburse travel",
-  "travel is not reimbursed",
-  "travel will not be reimbursed",
-  "no travel stipend",
-  "travel is not covered",
-  "not cover travel",
-  "at your own expense",
+/** Phrasing varies far more on the "no" side, so these are patterns. */
+const NEGATIVE_PATTERNS: RegExp[] = [
+  /\bno\s+travel\s+(reimbursement|reimbursements|stipend|stipends|grant|grants|funding|support|assistance)\b/,
+  /\b(do|does|will|can|could)\s*n[o']?t\s+(be\s+)?(able\s+to\s+)?(offer|offering|provide|providing|cover|covering|reimburse|reimbursing|fund|funding|sponsor)\b[^.!?]{0,60}\btravel\b/,
+  /\b(unable|not\s+able)\s+to\s+(offer|provide|cover|reimburse|fund)\b[^.!?]{0,60}\btravel\b/,
+  /\btravel\b[^.!?]{0,60}\b(is|are|will)\s+not\s+(be\s+)?(covered|reimbursed|provided|offered|funded)\b/,
+  /\btravel\b[^.!?]{0,40}\bat\s+your\s+own\s+expense\b/,
+  /\bnot\s+(offering|providing)\s+travel\b/,
 ];
 
 const CACHE_TTL_MS = 3 * 24 * 60 * 60 * 1000;
 const PAGE_BUDGET_BYTES = 900_000;
 const CANDIDATE_PATHS = ["", "/faq", "/travel", "/attend", "/scholarships", "/about"];
 
-function findQuote(text: string, phrase: string): string | undefined {
-  const index = text.toLowerCase().indexOf(phrase);
+/**
+ * Quotes the sentence containing the match. Event pages flatten into navigation
+ * fragments and stray numbers, so a fixed character window usually reads as
+ * noise; sentence boundaries keep the evidence legible.
+ */
+function findQuote(text: string, index: number, length: number): string | undefined {
   if (index < 0) return undefined;
-  const start = Math.max(0, index - 110);
-  const end = Math.min(text.length, index + phrase.length + 130);
-  const prefix = start > 0 ? "…" : "";
-  const suffix = end < text.length ? "…" : "";
-  return `${prefix}${text.slice(start, end).trim()}${suffix}`;
+  const windowStart = Math.max(0, index - 320);
+  const windowEnd = Math.min(text.length, index + length + 320);
+  const window = text.slice(windowStart, windowEnd);
+  const local = index - windowStart;
+
+  const before = window.slice(0, local);
+  const after = window.slice(local);
+  const start = Math.max(
+    before.lastIndexOf(". "),
+    before.lastIndexOf("! "),
+    before.lastIndexOf("? "),
+  );
+  const endMatch = after.match(/[.!?](\s|$)/);
+  const end = endMatch ? local + (endMatch.index ?? 0) + 1 : window.length;
+
+  const sentence = window
+    .slice(start >= 0 ? start + 2 : 0, end)
+    // Flattened menus leave runs of bare numbers behind.
+    .replace(/(?:\s\d{1,3}){3,}/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (sentence.length < 24) {
+    return `…${window.slice(Math.max(0, local - 90), local + length + 110).replace(/\s+/g, " ").trim()}…`;
+  }
+  return sentence.length > 260 ? `${sentence.slice(0, 257)}…` : sentence;
 }
 
 export interface PageFacts {
@@ -136,21 +154,23 @@ export async function checkTravelSupport(
     checked.push(url);
     const lower = page.text.toLowerCase();
 
-    for (const phrase of NEGATIVE_PHRASES) {
-      if (lower.includes(phrase) && !negative) {
+    for (const pattern of NEGATIVE_PATTERNS) {
+      const match = lower.match(pattern);
+      if (match?.index !== undefined && !negative) {
         negative = {
-          phrase,
-          quote: findQuote(page.text, phrase) ?? phrase,
+          phrase: match[0].replace(/\s+/g, " ").trim(),
+          quote: findQuote(page.text, match.index, match[0].length) ?? match[0],
           sourceUrl: url,
         };
       }
     }
 
     for (const phrase of STRONG_PHRASES) {
-      if (lower.includes(phrase)) {
+      const index = lower.indexOf(phrase);
+      if (index >= 0) {
         evidence.push({
           phrase,
-          quote: findQuote(page.text, phrase) ?? phrase,
+          quote: findQuote(page.text, index, phrase.length) ?? phrase,
           sourceUrl: url,
         });
       }
@@ -158,10 +178,11 @@ export async function checkTravelSupport(
 
     if (!weakHit) {
       for (const phrase of WEAK_PHRASES) {
-        if (lower.includes(phrase)) {
+        const index = lower.indexOf(phrase);
+        if (index >= 0) {
           weakHit = {
             phrase,
-            quote: findQuote(page.text, phrase) ?? phrase,
+            quote: findQuote(page.text, index, phrase.length) ?? phrase,
             sourceUrl: url,
           };
           break;
@@ -173,6 +194,17 @@ export async function checkTravelSupport(
   }
 
   const checkedAt = new Date().toISOString();
+
+  // A page that both advertises and limits travel funding is not a green light.
+  if (evidence.length && negative) {
+    return {
+      status: "likely",
+      evidence: [evidence[0], negative],
+      note: "The site mentions travel funding and also limits it; check who qualifies.",
+      checkedAt,
+      pagesChecked: checked,
+    };
+  }
 
   if (evidence.length) {
     return {

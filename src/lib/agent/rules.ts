@@ -85,12 +85,17 @@ function locationVerdicts(
         ),
       ];
     }
+    const venue = locations.filter((location) => !isVirtual(location));
     return [
       verdict(
         "region",
         "No travel required",
         "pass",
-        "Runs online, so the region rule does not apply.",
+        venue.length
+          ? `Offers an online track, so the region rule does not apply; the venue is ${venue
+              .map(formatLocation)
+              .join(", ")}.`
+          : "Runs online, so the region rule does not apply.",
       ),
     ];
   }

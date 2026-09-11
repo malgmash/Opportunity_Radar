@@ -46,6 +46,51 @@ function extractInertiaPayload(html: string): MlhPage {
   return JSON.parse(match[1]) as MlhPage;
 }
 
+/**
+ * MLH publishes ISO country codes, several of which collide with USPS state
+ * codes (CA, DE, IN, MO...). Spelling the country out keeps the location parser
+ * from reading a Canadian venue as California.
+ */
+const COUNTRY_NAMES: Record<string, string> = {
+  CA: "Canada",
+  GB: "United Kingdom",
+  UK: "United Kingdom",
+  IN: "India",
+  DE: "Germany",
+  FR: "France",
+  NL: "Netherlands",
+  ES: "Spain",
+  IT: "Italy",
+  PL: "Poland",
+  SE: "Sweden",
+  CH: "Switzerland",
+  IE: "Ireland",
+  PT: "Portugal",
+  AU: "Australia",
+  NZ: "New Zealand",
+  BR: "Brazil",
+  MX: "Mexico",
+  NG: "Nigeria",
+  KE: "Kenya",
+  ZA: "South Africa",
+  EG: "Egypt",
+  AE: "United Arab Emirates",
+  SG: "Singapore",
+  JP: "Japan",
+  KR: "South Korea",
+  CN: "China",
+  TW: "Taiwan",
+  ID: "Indonesia",
+  PH: "Philippines",
+  MY: "Malaysia",
+  PK: "Pakistan",
+  BD: "Bangladesh",
+  LK: "Sri Lanka",
+  NP: "Nepal",
+  IL: "Israel",
+  TR: "Turkey",
+};
+
 function locationStrings(event: MlhEvent): string[] {
   const format = (event.formatType ?? "").toLowerCase();
   if (format === "digital") return ["Online"];
@@ -56,8 +101,11 @@ function locationStrings(event: MlhEvent): string[] {
   if (venue?.state) parts.push(venue.state.trim());
   const composed = parts.join(", ");
   const raw = composed || event.location || "Unspecified";
+  const country = venue?.country?.toUpperCase();
   const withCountry =
-    venue?.country && venue.country !== "US" ? `${raw}, ${venue.country}` : raw;
+    country && country !== "US"
+      ? `${raw}, ${COUNTRY_NAMES[country] ?? "International"}`
+      : raw;
   return format === "hybrid" ? [withCountry, "Online"] : [withCountry];
 }
 
