@@ -1,6 +1,7 @@
 import { conferenceSource } from "./conferences";
 import { curatedSource } from "./curated";
 import { devpostSource } from "./devpost";
+import { instagramSource } from "./instagram";
 import { internshipSource } from "./internships";
 import { mlhSource } from "./mlh";
 import type { OpportunitySource } from "./types";
@@ -11,6 +12,7 @@ export const SOURCES: OpportunitySource[] = [
   internshipSource,
   conferenceSource,
   curatedSource,
+  instagramSource,
 ];
 
 export type { DraftOpportunity, OpportunitySource, SourceContext } from "./types";

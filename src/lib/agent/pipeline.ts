@@ -235,7 +235,12 @@ export async function runAgent(options: RunOptions): Promise<RunResult> {
       (item.locations.some((location) => location.state) ? 4 : 0) +
       (item.startDate ? 2 : 0) +
       Math.min(item.tags.length, 4) * 0.25;
-    if (weigh(candidate) > weigh(existing)) byKey.set(key, candidate);
+    const difference = weigh(candidate) - weigh(existing);
+    // Equally rich copies are broken by recency: the same alert posted twice
+    // should show the newer posting date.
+    const fresher =
+      (Date.parse(candidate.postedAt ?? "") || 0) > (Date.parse(existing.postedAt ?? "") || 0);
+    if (difference > 0 || (difference === 0 && fresher)) byKey.set(key, candidate);
   }
 
   let opportunities = [...byKey.values()];

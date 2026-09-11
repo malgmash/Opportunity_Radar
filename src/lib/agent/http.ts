@@ -70,6 +70,82 @@ export async function fetchText(url: string, options: FetchOptions = {}): Promis
   throw lastError instanceof Error ? lastError : new Error(`Failed to fetch ${url}`);
 }
 
+let curlPath: string | null | undefined;
+
+/** Resolved once: the platform may not ship curl at all. */
+async function findCurl(): Promise<string | null> {
+  if (curlPath !== undefined) return curlPath;
+  const { execFile } = await import("node:child_process");
+  curlPath = await new Promise<string | null>((resolve) => {
+    execFile("curl", ["--version"], { timeout: 5_000 }, (error) => {
+      resolve(error ? null : "curl");
+    });
+  });
+  return curlPath;
+}
+
+/**
+ * Some hosts fingerprint the TLS handshake and answer Node with 429 while
+ * answering curl normally — Instagram's public profile endpoint is one. Where
+ * curl exists, it is a usable second attempt; arguments are passed as an array
+ * so nothing reaches a shell.
+ */
+export async function fetchTextViaCurl(
+  url: string,
+  options: FetchOptions = {},
+): Promise<string> {
+  const curl = await findCurl();
+  if (!curl) throw new Error("curl is not available for the fallback transport");
+
+  const { timeoutMs = 20_000, headers = {} } = options;
+  const args = [
+    "-sS",
+    "--compressed",
+    "--location",
+    "--proto",
+    "=https",
+    "--max-time",
+    String(Math.ceil(timeoutMs / 1000)),
+    "--fail",
+    "-A",
+    BROWSER_UA,
+  ];
+  for (const [name, value] of Object.entries(headers)) {
+    args.push("-H", `${name}: ${value}`);
+  }
+  args.push("--", url);
+
+  const { execFile } = await import("node:child_process");
+  return new Promise<string>((resolve, reject) => {
+    execFile(
+      curl,
+      args,
+      { timeout: timeoutMs + 2_000, maxBuffer: options.maxBytes ?? 8 * 1024 * 1024 },
+      (error, stdout, stderr) => {
+        if (error) reject(new Error(`curl failed for ${url}: ${stderr || error.message}`));
+        else resolve(stdout);
+      },
+    );
+  });
+}
+
+/** Tries the normal transport first, then curl, so a block is not fatal. */
+export async function fetchJsonResilient<T>(
+  url: string,
+  options: FetchOptions = {},
+): Promise<T> {
+  try {
+    return await fetchJson<T>(url, options);
+  } catch (primaryError) {
+    try {
+      const body = await fetchTextViaCurl(url, options);
+      return JSON.parse(body) as T;
+    } catch {
+      throw primaryError;
+    }
+  }
+}
+
 export async function fetchJson<T>(url: string, options: FetchOptions = {}): Promise<T> {
   const body = await fetchText(url, {
     ...options,
