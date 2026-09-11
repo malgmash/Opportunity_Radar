@@ -122,10 +122,10 @@ function titleCase(word: string): string {
  * "Microsoft, SpaceX, TikTok 2027 SWE Internship apps ARE OPEN".
  */
 export function parseCompanies(sentence: string): string[] {
-  const match = /^(?<names>.{2,80}?)\s+(?:20\d{2})\b/.exec(stripDecoration(sentence));
-  if (!match?.groups?.names) return [];
+  const match = /^(.{2,80}?)\s+(?:20\d{2})\b/.exec(stripDecoration(sentence));
+  if (!match?.[1]) return [];
 
-  return match.groups.names
+  return match[1]
     .split(/\s*(?:,|&|\band\b|\+)\s*/i)
     .map((piece) => piece.replace(/[^A-Za-z0-9.\-' ]/g, "").trim())
     .filter((piece) => {
