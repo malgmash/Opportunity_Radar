@@ -97,6 +97,23 @@ describe("selectBoard", () => {
     expect(board.map((item) => item.id)).toContain("tapia");
   });
 
+  it("keeps Instagram alerts that a job board would outrank", () => {
+    const board = Array.from({ length: 20 }, (_, index) =>
+      make(`listing-${index}`, "United States", { score: 95 }),
+    );
+    const alert: Opportunity = {
+      ...make("ig-stripe", "United States", { score: 34 }),
+      source: {
+        id: "instagram:zero2sudo",
+        name: "@zero2sudo on Instagram",
+        url: "https://www.instagram.com/zero2sudo/",
+      },
+    };
+
+    const picked = selectBoard([...board, alert], DEFAULT_PROFILE, TODAY, 8);
+    expect(picked.map((item) => item.id)).toContain("ig-stripe");
+  });
+
   it("applies the limit per kind, not across the whole board", () => {
     const hackathons = Array.from({ length: 10 }, (_, index) =>
       make(`hack-${index}`, "Online"),

@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 
 import { AgentTrace } from "@/components/dashboard/agent-trace";
+import { AlertsCard } from "@/components/dashboard/alerts-card";
 import { OpportunityCard } from "@/components/dashboard/opportunity-card";
 import { ProfileDialog } from "@/components/dashboard/profile-dialog";
 import { ScheduleControl } from "@/components/dashboard/schedule-control";
@@ -38,6 +39,7 @@ import type {
   Profile,
   RunSummary,
 } from "@/lib/agent/types";
+import type { NotifyStatus } from "@/lib/notify/status";
 import { KIND_PLURALS, relativeTime } from "@/lib/ui";
 import { cn } from "@/lib/utils";
 
@@ -79,7 +81,13 @@ function Stat({
   );
 }
 
-export function Dashboard({ initialState }: { initialState: AgentState }) {
+export function Dashboard({
+  initialState,
+  initialAlerts,
+}: {
+  initialState: AgentState;
+  initialAlerts: NotifyStatus;
+}) {
   const [profile, setProfile] = useState<Profile>(initialState.profile);
   const [opportunities, setOpportunities] = useState<Opportunity[]>(
     initialState.opportunities,
@@ -507,6 +515,7 @@ export function Dashboard({ initialState }: { initialState: AgentState }) {
             sources={run.sources.length ? run.sources : (lastRun?.sources ?? [])}
             running={run.running}
           />
+          <AlertsCard initial={initialAlerts} />
           {lastRun && (
             <Card size="sm">
               <CardHeader>

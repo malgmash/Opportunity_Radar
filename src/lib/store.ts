@@ -5,6 +5,7 @@ import { DEFAULT_PROFILE, normalizeProfile } from "./agent/profile";
 import { normalizeSchedule } from "./agent/schedule";
 import type {
   AgentState,
+  NotificationRecord,
   Opportunity,
   Profile,
   RunSummary,
@@ -20,6 +21,7 @@ const EMPTY_STATE: AgentState = {
   opportunities: [],
   actions: {},
   schedule: normalizeSchedule(undefined),
+  notifiedAt: {},
 };
 
 let writeQueue: Promise<void> = Promise.resolve();
@@ -42,6 +44,7 @@ export async function readState(): Promise<AgentState> {
             ? { lastRunAt: parsed.lastRun.finishedAt, lastStatus: "ok" as const }
             : undefined),
       ),
+      notifiedAt: parsed.notifiedAt ?? {},
     };
   } catch {
     return EMPTY_STATE;
@@ -105,6 +108,17 @@ export async function saveRunFailure(
       consecutiveFailures: state.schedule.consecutiveFailures + 1,
     },
   }));
+}
+
+export async function recordNotification(
+  ids: string[],
+  record: NotificationRecord,
+): Promise<AgentState> {
+  return updateState((state) => {
+    const notifiedAt = { ...state.notifiedAt };
+    for (const id of ids) notifiedAt[id] = record.sentAt;
+    return { ...state, notifiedAt, lastNotification: record };
+  });
 }
 
 export async function saveSchedule(

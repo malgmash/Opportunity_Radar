@@ -47,6 +47,11 @@ export function priorityScore(
   return Math.round(score);
 }
 
+/** Social accounts that announce openings the moment they go live. */
+export function isAlertSource(opportunity: Opportunity): boolean {
+  return opportunity.source.id.startsWith("instagram:");
+}
+
 export function sortOpportunities(
   opportunities: Opportunity[],
   profile: Profile,
@@ -116,6 +121,12 @@ export function selectBoard(
     // relevance; a site the agent cannot read should not delete them.
     take(
       byPriority.filter((item) => item.source.id === "curated"),
+      Math.round(limitPerKind * 0.15),
+    );
+    // Alert accounts are followed for timing: "apps just opened at X" is worth
+    // a slot even when a job board listing scores higher on paper.
+    take(
+      byPriority.filter((item) => isAlertSource(item)),
       Math.round(limitPerKind * 0.15),
     );
     take(byPriority, limitPerKind);

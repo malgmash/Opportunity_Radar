@@ -6,6 +6,7 @@
 import { runAgent } from "../src/lib/agent/pipeline";
 import { formatLocations } from "../src/lib/agent/geo";
 import { describeInterval, msUntilNextRun } from "../src/lib/agent/schedule";
+import { describeOutcome, notifyNewMatches } from "../src/lib/notify";
 import { readState, saveRun, saveRunFailure } from "../src/lib/store";
 
 const DECISION_MARK = {
@@ -58,6 +59,9 @@ async function scan(quick: boolean) {
     process.stdout.write(`warnings:\n${run.warnings.map((w) => `  - ${w}`).join("\n")}\n`);
   }
   process.stdout.write(`Saved ${opportunities.length} opportunities to .data/state.json\n`);
+
+  const outcome = await notifyNewMatches(opportunities, state.profile);
+  process.stdout.write(`${describeOutcome(outcome)}\n`);
 }
 
 async function main() {

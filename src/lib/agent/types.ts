@@ -177,6 +177,15 @@ export interface ScheduleState {
   consecutiveFailures: number;
 }
 
+export interface NotificationRecord {
+  sentAt: string;
+  /** How many matches the digest carried, including any summarized overflow. */
+  matches: number;
+  transport: string;
+  status: "sent" | "skipped" | "error";
+  detail: string;
+}
+
 export interface AgentState {
   profile: Profile;
   lastRun?: RunSummary;
@@ -184,6 +193,9 @@ export interface AgentState {
   /** Opportunity id -> user decision. */
   actions: Record<string, "saved" | "dismissed">;
   schedule: ScheduleState;
+  /** Opportunity id -> when it went out in a digest, so nothing is sent twice. */
+  notifiedAt: Record<string, string>;
+  lastNotification?: NotificationRecord;
   updatedAt?: string;
 }
 

@@ -1,5 +1,6 @@
 import { runAgent, type RunResult } from "./agent/pipeline";
 import type { AgentEvent, RunTrigger } from "./agent/types";
+import { describeOutcome, notifyNewMatches } from "./notify";
 import { readState, saveRun, saveRunFailure } from "./store";
 
 export interface ActiveRun {
@@ -81,6 +82,14 @@ export function startRun(options: StartRunOptions): {
         emit,
       });
       await saveRun(result.run, result.opportunities, options.trigger);
+
+      const outcome = await notifyNewMatches(result.opportunities, state.profile);
+      emit({
+        type: "log",
+        level: outcome.status === "error" ? "warn" : "info",
+        message: describeOutcome(outcome),
+      });
+
       return result;
     } catch (error) {
       const message = (error as Error).message;
