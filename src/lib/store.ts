@@ -2,7 +2,15 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { DEFAULT_PROFILE, normalizeProfile } from "./agent/profile";
-import type { AgentState, Opportunity, Profile, RunSummary } from "./agent/types";
+import { normalizeSchedule } from "./agent/schedule";
+import type {
+  AgentState,
+  Opportunity,
+  Profile,
+  RunSummary,
+  RunTrigger,
+  ScheduleState,
+} from "./agent/types";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const STATE_FILE = path.join(DATA_DIR, "state.json");
@@ -11,6 +19,7 @@ const EMPTY_STATE: AgentState = {
   profile: DEFAULT_PROFILE,
   opportunities: [],
   actions: {},
+  schedule: normalizeSchedule(undefined),
 };
 
 let writeQueue: Promise<void> = Promise.resolve();
@@ -25,6 +34,14 @@ export async function readState(): Promise<AgentState> {
       profile: normalizeProfile(parsed.profile),
       actions: parsed.actions ?? {},
       opportunities: parsed.opportunities ?? [],
+      // State written before the schedule existed still counts as scanned, so
+      // adopting the cadence does not force an immediate rescan.
+      schedule: normalizeSchedule(
+        parsed.schedule ??
+          (parsed.lastRun
+            ? { lastRunAt: parsed.lastRun.finishedAt, lastStatus: "ok" as const }
+            : undefined),
+      ),
     };
   } catch {
     return EMPTY_STATE;
@@ -55,8 +72,48 @@ export async function updateState(
 export async function saveRun(
   run: RunSummary,
   opportunities: Opportunity[],
+  trigger: RunTrigger = "manual",
 ): Promise<AgentState> {
-  return updateState((state) => ({ ...state, lastRun: run, opportunities }));
+  return updateState((state) => ({
+    ...state,
+    lastRun: run,
+    opportunities,
+    schedule: {
+      ...state.schedule,
+      lastRunAt: run.finishedAt,
+      lastAttemptAt: run.finishedAt,
+      lastTrigger: trigger,
+      lastStatus: "ok",
+      lastError: undefined,
+      consecutiveFailures: 0,
+    },
+  }));
+}
+
+export async function saveRunFailure(
+  trigger: RunTrigger,
+  error: string,
+): Promise<AgentState> {
+  return updateState((state) => ({
+    ...state,
+    schedule: {
+      ...state.schedule,
+      lastAttemptAt: new Date().toISOString(),
+      lastTrigger: trigger,
+      lastStatus: "error",
+      lastError: error,
+      consecutiveFailures: state.schedule.consecutiveFailures + 1,
+    },
+  }));
+}
+
+export async function saveSchedule(
+  patch: Partial<ScheduleState>,
+): Promise<AgentState> {
+  return updateState((state) => ({
+    ...state,
+    schedule: normalizeSchedule({ ...state.schedule, ...patch }),
+  }));
 }
 
 export async function saveProfile(profile: Profile): Promise<AgentState> {

@@ -8,6 +8,7 @@
     "start": "next start -p 43127",
     "lint": "eslint",
     "agent": "tsx scripts/run-agent.ts",
+    "agent:watch": "tsx scripts/run-agent.ts --watch",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },

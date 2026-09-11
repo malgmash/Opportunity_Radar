@@ -1,10 +1,12 @@
 /**
  * Headless agent run. Useful for cron jobs and for seeding the dashboard before
- * the first visit: `npm run agent`.
+ * the first visit: `npm run agent`. Add `--watch` to keep rescanning on the
+ * profile's schedule without the web server running.
  */
 import { runAgent } from "../src/lib/agent/pipeline";
 import { formatLocations } from "../src/lib/agent/geo";
-import { readState, saveRun } from "../src/lib/store";
+import { describeInterval, msUntilNextRun } from "../src/lib/agent/schedule";
+import { readState, saveRun, saveRunFailure } from "../src/lib/store";
 
 const DECISION_MARK = {
   eligible: "ok  ",
@@ -12,9 +14,11 @@ const DECISION_MARK = {
   excluded: "drop",
 } as const;
 
-async function main() {
+const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, Math.min(ms, 2 ** 31 - 1)));
+
+async function scan(quick: boolean) {
   const state = await readState();
-  const quick = process.argv.includes("--quick");
 
   const { run, opportunities } = await runAgent({
     profile: state.profile,
@@ -32,7 +36,7 @@ async function main() {
     },
   });
 
-  await saveRun(run, opportunities);
+  await saveRun(run, opportunities, "cli");
 
   process.stdout.write(`\n${run.digest}\n\n`);
   for (const kind of ["hackathon", "internship", "conference"] as const) {
@@ -54,6 +58,32 @@ async function main() {
     process.stdout.write(`warnings:\n${run.warnings.map((w) => `  - ${w}`).join("\n")}\n`);
   }
   process.stdout.write(`Saved ${opportunities.length} opportunities to .data/state.json\n`);
+}
+
+async function main() {
+  const quick = process.argv.includes("--quick");
+  const watch = process.argv.includes("--watch");
+
+  for (;;) {
+    try {
+      await scan(quick);
+    } catch (error) {
+      if (!watch) throw error;
+      const message = (error as Error).message;
+      process.stderr.write(`scan failed: ${message}\n`);
+      await saveRunFailure("cli", message);
+    }
+
+    if (!watch) return;
+
+    const { schedule } = await readState();
+    const wait = msUntilNextRun(schedule);
+    process.stdout.write(
+      `\nWatching ${describeInterval(schedule.intervalHours)}. Next scan at ` +
+        `${new Date(Date.now() + wait).toLocaleString()}.\n\n`,
+    );
+    await sleep(wait);
+  }
 }
 
 main().catch((error) => {

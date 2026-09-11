@@ -21,6 +21,13 @@ interface Options {
   onComplete: (run: RunSummary, opportunities: Opportunity[]) => void;
 }
 
+interface RunOptions {
+  /** Shorter travel-funding budget, for a scan that returns in seconds. */
+  quick?: boolean;
+  /** Only watch a scan that is already running; never start one. */
+  attachOnly?: boolean;
+}
+
 /** Consumes the NDJSON trace the run endpoint streams back. */
 export function useAgentRun({ onComplete }: Options) {
   const [state, setState] = useState<RunState>({
@@ -30,18 +37,28 @@ export function useAgentRun({ onComplete }: Options) {
   });
   const abortRef = useRef<AbortController | null>(null);
 
-  const start = useCallback(
-    async (quick = false) => {
+  const begin = useCallback(
+    async ({ quick = false, attachOnly = false }: RunOptions = {}) => {
       if (abortRef.current) return;
       const controller = new AbortController();
       abortRef.current = controller;
       setState({ running: true, steps: [], sources: [], error: undefined });
 
       try {
-        const response = await fetch(`/api/agent/run${quick ? "?quick=1" : ""}`, {
+        const params = new URLSearchParams();
+        if (quick) params.set("quick", "1");
+        if (attachOnly) params.set("attach", "1");
+        const query = params.size ? `?${params}` : "";
+        const response = await fetch(`/api/agent/run${query}`, {
           method: "POST",
           signal: controller.signal,
         });
+
+        // 204 means the unattended run already finished; nothing to watch.
+        if (attachOnly && response.status === 204) {
+          setState((current) => ({ ...current, running: false }));
+          return;
+        }
 
         if (!response.ok || !response.body) {
           const detail = await response.json().catch(() => ({}));
@@ -107,5 +124,11 @@ export function useAgentRun({ onComplete }: Options) {
     [onComplete],
   );
 
-  return { ...state, start };
+  const start = useCallback(
+    (quick = false) => begin({ quick }),
+    [begin],
+  );
+  const attach = useCallback(() => begin({ attachOnly: true }), [begin]);
+
+  return { ...state, start, attach };
 }

@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertCircle,
   Building2,
   CalendarClock,
+  Clock,
   Globe,
   Loader2,
   MapPin,
@@ -19,7 +20,9 @@ import { toast } from "sonner";
 import { AgentTrace } from "@/components/dashboard/agent-trace";
 import { OpportunityCard } from "@/components/dashboard/opportunity-card";
 import { ProfileDialog } from "@/components/dashboard/profile-dialog";
+import { ScheduleControl } from "@/components/dashboard/schedule-control";
 import { useAgentRun } from "@/components/dashboard/use-agent-run";
+import { useSchedule, useTicker } from "@/components/dashboard/use-schedule";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { inHomeRegion, isVirtual, US_STATES } from "@/lib/agent/geo";
+import { describeInterval } from "@/lib/agent/schedule";
 import type {
   AgentState,
   Opportunity,
@@ -86,15 +90,68 @@ export function Dashboard({ initialState }: { initialState: AgentState }) {
   const [chips, setChips] = useState<ChipId[]>([]);
   const [query, setQuery] = useState("");
 
-  const onComplete = useCallback((run: RunSummary, items: Opportunity[]) => {
+  const lastRunRef = useRef(initialState.lastRun);
+  useEffect(() => {
+    lastRunRef.current = lastRun;
+  }, [lastRun]);
+
+  const applyRun = useCallback((run: RunSummary, items: Opportunity[]) => {
     setLastRun(run);
     setOpportunities(items);
-    toast.success(
-      `${run.counts.eligible} opportunities clear every rule (${items.length} on the board).`,
-    );
   }, []);
 
+  const onComplete = useCallback(
+    (run: RunSummary, items: Opportunity[]) => {
+      applyRun(run, items);
+      toast.success(
+        `${run.counts.eligible} opportunities clear every rule (${items.length} on the board).`,
+      );
+    },
+    [applyRun],
+  );
+
   const run = useAgentRun({ onComplete });
+  const attachToRun = run.attach;
+
+  /** A scheduled scan finished while this tab was open: pull the new board in. */
+  const onBackgroundRunFinished = useCallback(
+    async (finishedAt: string) => {
+      if (lastRunRef.current?.finishedAt === finishedAt) return;
+      try {
+        const response = await fetch("/api/state", { cache: "no-store" });
+        if (!response.ok) return;
+        const next = (await response.json()) as AgentState;
+        if (!next.lastRun) return;
+        applyRun(next.lastRun, next.opportunities);
+        setActions(next.actions);
+        toast.success(
+          `Scheduled scan refreshed the board — ${next.lastRun.counts.eligible} clear every rule.`,
+        );
+      } catch {
+        // The next poll will try again.
+      }
+    },
+    [applyRun],
+  );
+
+  /** Attach the live trace to a scan the scheduler started. */
+  const onBackgroundRunDetected = useCallback(() => {
+    void attachToRun();
+  }, [attachToRun]);
+
+  const schedule = useSchedule({
+    initial: initialState.schedule,
+    onBackgroundRunFinished,
+    onBackgroundRunDetected,
+  });
+  const now = useTicker();
+  const refreshSchedule = schedule.refresh;
+
+  useEffect(() => {
+    if (run.running) return;
+    // Pick up anything that landed between polls once a manual run settles.
+    void refreshSchedule();
+  }, [run.running, refreshSchedule]);
 
   const toggleChip = (id: ChipId) =>
     setChips((current) =>
@@ -203,6 +260,19 @@ export function Dashboard({ initialState }: { initialState: AgentState }) {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <ScheduleControl
+              status={schedule.status}
+              saving={schedule.saving}
+              now={now}
+              onToggle={(enabled) => {
+                void schedule.update({ enabled });
+                toast.info(
+                  enabled
+                    ? `Automatic scans resumed — ${describeInterval(schedule.status.schedule.intervalHours)}.`
+                    : "Automatic scans paused. Use Run again whenever you want a fresh sweep.",
+                );
+              }}
+            />
             <ProfileDialog profile={profile} onSaved={setProfile} />
             <Button size="sm" onClick={() => run.start()} disabled={run.running}>
               {run.running ? (
@@ -312,6 +382,10 @@ export function Dashboard({ initialState }: { initialState: AgentState }) {
                 </Button>
                 <p className="text-muted-foreground text-xs">
                   A full scan reads about 1,800 listings and takes under a minute.
+                  {schedule.status.schedule.enabled &&
+                    ` The agent also rescans on its own ${describeInterval(
+                      schedule.status.schedule.intervalHours,
+                    )}.`}
                 </p>
               </CardContent>
             </Card>
@@ -459,6 +533,12 @@ export function Dashboard({ initialState }: { initialState: AgentState }) {
                   <Sparkles className="mt-0.5 size-3.5 shrink-0" />
                   Fit threshold {profile.minimumFitScore}/100 across{" "}
                   {profile.interests.length} focus areas.
+                </p>
+                <p className="flex gap-1.5">
+                  <Clock className="mt-0.5 size-3.5 shrink-0" />
+                  {schedule.status.schedule.enabled
+                    ? `Rescans ${describeInterval(schedule.status.schedule.intervalHours)}, unattended.`
+                    : "Automatic rescans are paused."}
                 </p>
               </CardContent>
             </Card>

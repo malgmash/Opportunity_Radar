@@ -161,12 +161,29 @@ export interface RunSummary {
   warnings: string[];
 }
 
+/** What set a run going, for the schedule bookkeeping. */
+export type RunTrigger = "manual" | "schedule" | "startup" | "cron" | "cli";
+
+export interface ScheduleState {
+  enabled: boolean;
+  /** How long the agent waits between unattended scans. */
+  intervalHours: number;
+  lastRunAt?: string;
+  lastAttemptAt?: string;
+  lastTrigger?: RunTrigger;
+  lastStatus?: "ok" | "error";
+  lastError?: string;
+  /** Drives the retry backoff so a broken feed does not burn the full cadence. */
+  consecutiveFailures: number;
+}
+
 export interface AgentState {
   profile: Profile;
   lastRun?: RunSummary;
   opportunities: Opportunity[];
   /** Opportunity id -> user decision. */
   actions: Record<string, "saved" | "dismissed">;
+  schedule: ScheduleState;
   updatedAt?: string;
 }
 
