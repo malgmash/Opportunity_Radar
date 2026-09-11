@@ -10,7 +10,7 @@ import {
 import { daysBetween, describeCountdown, formatDateRange } from "./dates";
 import { inHomeRegion, isUnitedStates, isVirtual, parseLocation, US_STATES } from "./geo";
 import { evaluate, needsTravelCheck } from "./rules";
-import { priorityScore, sortOpportunities } from "./rank";
+import { priorityScore, selectBoard } from "./rank";
 import { selectReasoner } from "./reasoner";
 import { SOURCES, type DraftOpportunity } from "./sources";
 import { TRACK_LABELS } from "./taxonomy";
@@ -451,15 +451,7 @@ export async function runAgent(options: RunOptions): Promise<RunResult> {
     (item) => item.eligibility.decision !== "excluded",
   );
 
-  const ranked = sortOpportunities(opportunities, profile, today);
-  const kept: Opportunity[] = [];
-  const perKind: Record<string, number> = {};
-  for (const item of ranked) {
-    const count = perKind[item.kind] ?? 0;
-    if (count >= keepPerKind) continue;
-    perKind[item.kind] = count + 1;
-    kept.push(item);
-  }
+  const kept = selectBoard(opportunities, profile, today, keepPerKind);
 
   const counts = {
     collected: drafts.length,
@@ -467,7 +459,7 @@ export async function runAgent(options: RunOptions): Promise<RunResult> {
     needsVerification: kept.filter(
       (item) => item.eligibility.decision === "needs_verification",
     ).length,
-    excluded: ranked.length - kept.length,
+    excluded: opportunities.length - kept.length,
     byKind: {
       hackathon: kept.filter((item) => item.kind === "hackathon").length,
       internship: kept.filter((item) => item.kind === "internship").length,

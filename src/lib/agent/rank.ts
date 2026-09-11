@@ -66,3 +66,56 @@ export function sortOpportunities(
     return (rank.get(b.id) ?? 0) - (rank.get(a.id) ?? 0);
   });
 }
+
+/**
+ * Fills the board with quotas per kind rather than a flat cut. A pure ranking
+ * lets the long tail of online hackathons crowd out the two categories the
+ * profile is actually built around: events near home, and out-of-region events
+ * that pay for travel.
+ */
+export function selectBoard(
+  opportunities: Opportunity[],
+  profile: Profile,
+  today: Date,
+  limitPerKind: number,
+): Opportunity[] {
+  const kinds = new Set(opportunities.map((item) => item.kind));
+  const board: Opportunity[] = [];
+
+  for (const kind of kinds) {
+    const items = opportunities.filter((item) => item.kind === kind);
+    const byPriority = [...items].sort(
+      (a, b) => priorityScore(b, profile, today) - priorityScore(a, profile, today),
+    );
+
+    const picked = new Set<string>();
+    const take = (candidates: Opportunity[], quota: number) => {
+      let taken = 0;
+      for (const item of candidates) {
+        if (taken >= quota || picked.size >= limitPerKind) break;
+        if (picked.has(item.id)) continue;
+        picked.add(item.id);
+        taken += 1;
+      }
+    };
+
+    take(
+      byPriority.filter((item) =>
+        item.locations.some((location) => inHomeRegion(location, profile.homeRegion)),
+      ),
+      Math.round(limitPerKind * 0.6),
+    );
+    take(
+      byPriority.filter(
+        (item) =>
+          item.travel.status === "confirmed" || item.travel.status === "likely",
+      ),
+      Math.round(limitPerKind * 0.25),
+    );
+    take(byPriority, limitPerKind);
+
+    board.push(...items.filter((item) => picked.has(item.id)));
+  }
+
+  return sortOpportunities(board, profile, today);
+}
