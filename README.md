@@ -25,12 +25,16 @@ npm run dev        # http://localhost:43127
 ```
 
 The dashboard starts empty. Press **Run the agent** and the scan streams its
-trace live; it reads roughly 1,800 listings and finishes in under a minute. You
-can also run it headless, which is what you would put on a cron job:
+trace live; it reads roughly 1,800 listings and finishes in under a minute.
+After that the agent keeps itself current on its own — see [Automatic
+refresh](#automatic-refresh).
+
+You can also run it headless:
 
 ```bash
-npm run agent          # full scan, writes .data/state.json
+npm run agent              # one full scan, writes .data/state.json
 npm run agent -- --quick   # fewer page fetches, faster
+npm run agent:watch        # scan now, then keep rescanning on the schedule
 ```
 
 No API keys are required. If `OPENAI_API_KEY` is set the agent uses a model to
@@ -42,7 +46,49 @@ variables:
 OPENAI_API_KEY=sk-...                      # enables the LLM reasoner
 OPENAI_BASE_URL=https://api.openai.com/v1  # any OpenAI-compatible endpoint
 OPENAI_MODEL=gpt-4o-mini
+
+AGENT_REFRESH_HOURS=6                      # cadence for unattended scans
+AGENT_REFRESH_DISABLED=1                   # turn the in-app scheduler off
+CRON_SECRET=...                            # guards /api/cron/refresh
 ```
+
+## Automatic refresh
+
+The agent rescans **every 6 hours** without anyone pressing a button. When the
+server starts, `src/instrumentation.ts` starts the loop in
+`src/lib/scheduler.ts`, which works out when the next scan is owed from the last
+one and sleeps until then. Deadlines move, hackathon registrations open and
+internship boards churn daily, so a scan that is at most six hours stale is the
+point of the tool.
+
+What that means in practice:
+
+- The countdown in the header shows when the next scan lands. Pause and resume
+  it there; the choice is persisted.
+- A scan that the scheduler started streams into the trace panel of any open
+  tab, and the board refreshes itself when it lands. No reload needed.
+- Manual and scheduled scans share one lock. Pressing **Run again** during an
+  unattended scan attaches to it rather than starting a second one.
+- A failed scan retries on a backoff (5 minutes, doubling, capped at an hour)
+  instead of waiting out the full six hours. The header says so, with the error.
+- The interval is clamped to 1–168 hours. Set `AGENT_REFRESH_HOURS` to change
+  the default, or `AGENT_REFRESH_DISABLED=1` to run on demand only.
+
+### Scheduling on a host with no long-lived process
+
+Serverless platforms recycle the process, so the in-app timer will not survive.
+Point an external scheduler at `/api/cron/refresh` every 6 hours instead; the
+route is a no-op unless a scan is actually owed, and it takes `?force=1` to
+override that. Set `CRON_SECRET` and pass it as `Authorization: Bearer <secret>`
+or `?key=<secret>`.
+
+```jsonc
+// vercel.json
+{ "crons": [{ "path": "/api/cron/refresh", "schedule": "0 */6 * * *" }] }
+```
+
+On a plain server, `npm run agent:watch` does the same thing with no web server
+at all.
 
 ## How the agent works
 
@@ -107,10 +153,14 @@ src/lib/agent/        the agent: sources, rules, enrichment, ranking
   enrich.ts           reads event pages for travel funding, dates, locations
   geo.ts              US state normalization and region membership
   reasoner.ts         LLM reasoner with a keyword fallback
-src/app/api/          run, profile and state endpoints
+  schedule.ts         when the next unattended scan is owed
+src/lib/runner.ts     one scan at a time, shared by the UI and the scheduler
+src/lib/scheduler.ts  the 6-hour loop
+src/instrumentation.ts  starts the loop with the server
+src/app/api/          run, schedule, cron, profile and state endpoints
 src/components/       dashboard UI
-scripts/run-agent.ts  headless run
-tests/                rules, geography and date-parsing tests
+scripts/run-agent.ts  headless run, with --watch
+tests/                rules, geography, date-parsing and schedule tests
 ```
 
 State lives in `.data/state.json`, with a page cache in `.data/cache/`. Both are
