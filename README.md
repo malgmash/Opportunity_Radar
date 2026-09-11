@@ -90,6 +90,53 @@ or `?key=<secret>`.
 On a plain server, `npm run agent:watch` does the same thing with no web server
 at all.
 
+## Email alerts
+
+When a scan finds an internship that clears **every** rule and has not been
+announced before, the agent emails it. Nothing in "needs a check" is emailed —
+that bucket exists for a human to judge, and pushing it would train you to ignore
+the alerts.
+
+```bash
+NOTIFY_TO=you@personal.com          # where digests go; required to send
+SMTP_HOST=smtp.gmail.com            # Gmail needs an App Password, not your login
+SMTP_PORT=465
+SMTP_USER=you@gmail.com
+SMTP_PASS=your-16-char-app-password
+```
+
+Set those and digests start flowing. A few details worth knowing:
+
+- **Nothing is sent twice.** Each announced opportunity id is recorded in
+  `.data/state.json`, so a six-hour rescan that sees the same 60 internships
+  sends nothing.
+- **The first digest is capped** at six items and says so, because otherwise it
+  would carry the entire existing board. The rest are counted in a one-line
+  summary and marked as announced.
+- **Nearest deadline first**, then best fit.
+- **Mail failures never fail a scan.** The error is recorded and shown on the
+  dashboard, and the run keeps its results.
+- **No credentials? It still works.** Every digest is written to
+  `.data/outbox/` as HTML and text, so you can see exactly what would have been
+  sent before wiring up mail.
+- **Send a test digest** from the Email alerts card on the dashboard to prove
+  the setup without waiting for a new internship.
+
+Other options:
+
+```bash
+RESEND_API_KEY=re_...               # alternative to SMTP; takes precedence
+NOTIFY_FROM="Radar <radar@you.dev>" # defaults to SMTP_USER
+NOTIFY_KINDS=internship,hackathon   # defaults to internship only
+NOTIFY_MAX_PER_EMAIL=12
+NOTIFY_BOARD_URL=https://...        # the "full board" link in the footer
+```
+
+> Put real credentials in the environment, never in the repo. For a Cloud Agent,
+> add them under **Cloud Agents → Secrets** in the Cursor dashboard; locally use
+> `.env.local`, which is gitignored. An app password is a password: it does not
+> belong in a chat message or a commit.
+
 ## How the agent works
 
 Each run is an eight-stage pipeline in `src/lib/agent/pipeline.ts`. The trace
@@ -113,6 +160,36 @@ panel in the UI is a live view of these stages.
 | [SimplifyJobs](https://github.com/SimplifyJobs) + [vanshb03](https://github.com/vanshb03) internship lists | Internships | Community-maintained JSON with terms, categories and degree requirements |
 | [confs.tech](https://github.com/tech-conferences/conference-data) | Conferences | Open dataset, filtered to relevant topics |
 | Curated series list | Conferences | Recurring Southeast events plus national conferences with student travel funding programs |
+| [@zero2sudo](https://www.instagram.com/zero2sudo/) on Instagram | Internships, hackathons, conferences | Alert account; captions are parsed into per-company leads |
+
+#### Instagram alert accounts
+
+`@zero2sudo` posts the moment a cycle opens — "Microsoft, SpaceX, TikTok 2027 SWE
+Internship apps ARE OPEN" — which lands well before those roles reach the job
+boards. The adapter reads the account's public profile feed (no login, no API
+key, no credentials of yours) and keeps only captions that announce something:
+
+- One card per company named in the post, so that caption becomes three leads.
+- Role abbreviations are spelled out (`SWE` → software engineering, `TPM` →
+  technical program manager) so the relevance scorer and the card both read well.
+- Only the announcement sentence is carried forward. Later sentences in these
+  captions wander into new-grad and sponsorship talk that would mislead the
+  eligibility rules.
+- The link is the post itself, because these captions keep the application link
+  in a story.
+- Lifestyle, sponsored and how-to posts are dropped, as are cycles whose year has
+  passed and windows that already closed.
+
+Add more accounts with `INSTAGRAM_ACCOUNTS=zero2sudo,someoneelse`.
+
+Two things make this source survive real conditions. Instagram answers Node's TLS
+fingerprint with `429` while answering `curl` normally, so `fetchJsonResilient`
+tries the normal transport and then shells out to `curl` with an argument array.
+And because the endpoint rate-limits bursts, the disk cache serves its last good
+copy when a fetch fails, with the card and the trace saying how old that copy is.
+If Instagram ever gates the endpoint entirely, `INSTAGRAM_SESSIONID` is read as an
+optional cookie — but it is not needed today, and a session cookie is worth
+treating as a password.
 
 The curated list deliberately stores no dates. The agent reads each site and
 promotes an entry only once it can find a date, so a stale entry degrades into a
@@ -154,17 +231,19 @@ src/lib/agent/        the agent: sources, rules, enrichment, ranking
   geo.ts              US state normalization and region membership
   reasoner.ts         LLM reasoner with a keyword fallback
   schedule.ts         when the next unattended scan is owed
+src/lib/notify/       email digests: selection, rendering, transports
 src/lib/runner.ts     one scan at a time, shared by the UI and the scheduler
 src/lib/scheduler.ts  the 6-hour loop
 src/instrumentation.ts  starts the loop with the server
-src/app/api/          run, schedule, cron, profile and state endpoints
+src/app/api/          run, schedule, cron, notifications, profile and state endpoints
 src/components/       dashboard UI
 scripts/run-agent.ts  headless run, with --watch
 tests/                rules, geography, date-parsing and schedule tests
 ```
 
-State lives in `.data/state.json`, with a page cache in `.data/cache/`. Both are
-gitignored; delete the directory to start clean.
+State lives in `.data/state.json`, with a page cache in `.data/cache/` and
+unsent digests in `.data/outbox/`. All three are gitignored; delete the
+directory to start clean.
 
 ```bash
 npm test         # vitest
