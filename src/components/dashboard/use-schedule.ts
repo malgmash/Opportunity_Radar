@@ -14,7 +14,10 @@ export interface ScheduleStatus {
   runningTrigger: RunTrigger | null;
 }
 
-const POLL_MS = 45_000;
+/** Quiet cadence: just enough to notice a scan the scheduler kicked off. */
+const IDLE_POLL_MS = 20_000;
+/** While a scan is in flight, follow it closely so the board lands promptly. */
+const ACTIVE_POLL_MS = 5_000;
 
 interface Options {
   initial: ScheduleState;
@@ -61,26 +64,39 @@ export function useSchedule({
     [onBackgroundRunFinished, onBackgroundRunDetected],
   );
 
+  /** Resolves to whether a scan is in flight, which sets the next poll delay. */
   const refresh = useCallback(async () => {
     try {
       const response = await fetch("/api/agent/schedule", { cache: "no-store" });
-      if (!response.ok) return;
-      apply((await response.json()) as ScheduleStatus);
+      if (!response.ok) return false;
+      const next = (await response.json()) as ScheduleStatus;
+      apply(next);
+      return next.running;
     } catch {
       // Offline or mid-restart; the next poll picks it up.
+      return false;
     }
   }, [apply]);
 
   useEffect(() => {
-    // The countdown is already rendered from server state, so the first poll
-    // waits for hydration to settle rather than racing it.
-    const kickoff = setTimeout(() => void refresh(), 1_000);
-    const poll = setInterval(() => void refresh(), POLL_MS);
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const poll = async () => {
+      const running = await refresh();
+      if (stopped) return;
+      timer = setTimeout(poll, running ? ACTIVE_POLL_MS : IDLE_POLL_MS);
+    };
+
+    // The countdown already renders from server state, so the first poll waits
+    // for hydration to settle rather than racing it.
+    timer = setTimeout(poll, 1_000);
     const onFocus = () => void refresh();
     window.addEventListener("focus", onFocus);
+
     return () => {
-      clearTimeout(kickoff);
-      clearInterval(poll);
+      stopped = true;
+      clearTimeout(timer);
       window.removeEventListener("focus", onFocus);
     };
   }, [refresh]);
