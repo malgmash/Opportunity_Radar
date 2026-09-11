@@ -86,6 +86,18 @@ buses. It reports one of:
 
 Only *confirmed* clears the region rule. Unknown never silently passes.
 
+Because most student hackathons never publish a travel policy in static HTML,
+*unknown* is the common case, and those events land in **Needs a check** with the
+reason attached rather than being dropped or oversold.
+
+### Board composition
+
+Ranking alone lets the long tail of online hackathons crowd out the categories
+the profile is built around, so each opportunity type fills its slots with
+quotas: in-region events first, then out-of-region events with travel funding,
+then curated series, then everything else by priority. `selectBoard` in
+`src/lib/agent/rank.ts` owns this, and `tests/rank.test.ts` pins the behaviour.
+
 ## Layout
 
 ```
