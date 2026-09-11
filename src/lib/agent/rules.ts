@@ -131,6 +131,25 @@ function locationVerdicts(
     ];
   }
 
+  // Confirmed funding satisfies the region rule outright; anything less leaves the
+  // listing as something to verify by hand rather than a recommendation.
+  if (travel.status === "confirmed") {
+    return [
+      verdict(
+        "region",
+        "Outside the region but funded",
+        "pass",
+        `${where} is outside ${regionNames(profile.homeRegion)}, and the event funds travel.`,
+      ),
+      verdict(
+        "travel",
+        "Travel funding confirmed",
+        "pass",
+        `${travel.note} Matched "${travel.evidence[0]?.phrase}".`,
+      ),
+    ];
+  }
+
   const base = verdict(
     "region",
     "Outside your home region",
@@ -139,16 +158,6 @@ function locationVerdicts(
   );
 
   switch (travel.status) {
-    case "confirmed":
-      return [
-        base,
-        verdict(
-          "travel",
-          "Travel funding confirmed",
-          "pass",
-          `${travel.note} Matched "${travel.evidence[0]?.phrase}".`,
-        ),
-      ];
     case "likely":
       return [
         base,

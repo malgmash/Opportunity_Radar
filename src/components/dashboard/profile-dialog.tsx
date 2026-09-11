@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Loader2, Settings2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,9 +38,10 @@ export function ProfileDialog({
   const [draft, setDraft] = useState<Profile>(profile);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (open) setDraft(profile);
-  }, [open, profile]);
+  function openChange(next: boolean) {
+    if (next) setDraft(profile);
+    setOpen(next);
+  }
 
   const update = <K extends keyof Profile>(key: K, value: Profile[K]) =>
     setDraft((current) => ({ ...current, [key]: value }));
@@ -88,7 +89,7 @@ export function ProfileDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={openChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Settings2 className="size-4" />
