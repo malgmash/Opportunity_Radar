@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { analyzePageText } from "../src/lib/agent/enrich";
+import { analyzePageText, decideTravelSupport } from "../src/lib/agent/enrich";
 import { parseLocation } from "../src/lib/agent/geo";
 
 const URL_UNDER_TEST = "https://example.org/faq";
@@ -63,6 +63,55 @@ describe("travel funding detection", () => {
     const question = analyzePageText("36 Do you offer travel stipends?", URL_UNDER_TEST);
     expect(question.evidence.length).toBeGreaterThan(0);
     expect(question.evidence[0].quote).toMatch(/\?/);
+  });
+});
+
+describe("travel funding verdicts", () => {
+  const decide = (text: string) =>
+    decideTravelSupport(analyzePageText(text, URL_UNDER_TEST), [URL_UNDER_TEST]);
+
+  it("confirms only when the page states a policy", () => {
+    expect(
+      decide(
+        "We reimburse travel up to $150 for students who travel more than 100 miles to attend.",
+      ).status,
+    ).toBe("confirmed");
+  });
+
+  it("does not confirm from a keyword in a navigation menu", () => {
+    const result = decide(
+      "Home Register Attend Venue + Travel FAQ Scholarships + Travel Funding Code of Conduct Sponsor Program Schedule Explore",
+    );
+    expect(result.status).toBe("likely");
+    expect(result.note).toContain("never states the policy outright");
+  });
+
+  it("reports a refusal even when the same sentence matches a funding keyword", () => {
+    const result = decide(
+      "Is travel reimbursement provided? Unfortunately, we aren’t able to offer travel reimbursements this year due to budget limitations.",
+    );
+    expect(result.status).toBe("not_offered");
+  });
+
+  it("downgrades to likely when a page both offers and limits funding", () => {
+    const result = decide(
+      "We offer travel reimbursement of up to $100 for teams from partner schools. We do not cover travel for international attendees.",
+    );
+    expect(result.status).toBe("likely");
+    expect(result.evidence).toHaveLength(2);
+  });
+
+  it("stays unknown when the page says nothing about travel", () => {
+    const result = decide(
+      "Join us for a weekend of building. Registration opens in September and includes meals and swag.",
+    );
+    expect(result.status).toBe("unknown");
+  });
+
+  it("reports a distinct note when no page could be read", () => {
+    const result = decideTravelSupport({ evidence: [] }, []);
+    expect(result.status).toBe("unknown");
+    expect(result.note).toContain("Could not read");
   });
 });
 

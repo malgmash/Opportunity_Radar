@@ -227,34 +227,21 @@ export function analyzePageText(text: string, url: string): PageSignals {
   return signals;
 }
 
-export async function checkTravelSupport(
-  baseUrl: string,
-  extraUrls: string[] = [],
-  maxPages = 3,
-): Promise<TravelSupport> {
-  const checked: string[] = [];
-  const evidence: TravelEvidence[] = [];
-  let negative: TravelEvidence | undefined;
-  let weakHit: TravelEvidence | undefined;
-
-  for (const url of pageCandidates(baseUrl, extraUrls)) {
-    if (checked.length >= maxPages) break;
-    const page = await loadPage(url);
-    if (!page || page.text.length < 200) continue;
-    checked.push(url);
-
-    const signals = analyzePageText(page.text, url);
-    evidence.push(...signals.evidence);
-    negative ??= signals.negative;
-    weakHit ??= signals.weak;
-
-    if (evidence.length) break;
-  }
-
+/** Turns the signals gathered across pages into a single verdict. */
+export function decideTravelSupport(
+  signals: PageSignals,
+  checked: string[] = [],
+): TravelSupport {
+  const { negative, weak: weakHit } = signals;
   const checkedAt = new Date().toISOString();
 
-  const ranked = evidence
+  const ranked = signals.evidence
+    // "We aren't able to offer travel reimbursements" matches a positive phrase
+    // and a refusal at once; the refusal is the real statement.
+    .filter((entry) => entry.quote !== negative?.quote)
     .map((entry) => ({ entry, score: scoreQuote(entry.quote) }))
+    // Next to a refusal, an FAQ heading is not counter-evidence.
+    .filter((item) => !negative || item.score >= 1)
     .sort((a, b) => b.score - a.score);
 
   // A page that both advertises and limits travel funding is not a green light.
@@ -318,6 +305,33 @@ export async function checkTravelSupport(
     checkedAt,
     pagesChecked: checked,
   };
+}
+
+export async function checkTravelSupport(
+  baseUrl: string,
+  extraUrls: string[] = [],
+  maxPages = 3,
+): Promise<TravelSupport> {
+  const checked: string[] = [];
+  const gathered: PageSignals = { evidence: [] };
+
+  for (const url of pageCandidates(baseUrl, extraUrls)) {
+    if (checked.length >= maxPages) break;
+    const page = await loadPage(url);
+    if (!page || page.text.length < 200) continue;
+    checked.push(url);
+
+    const signals = analyzePageText(page.text, url);
+    gathered.negative ??= signals.negative;
+    gathered.weak ??= signals.weak;
+    gathered.evidence.push(...signals.evidence);
+
+    // A keyword buried in a navigation menu is not an answer, so keep reading
+    // the remaining candidate pages until something states a policy.
+    if (gathered.evidence.some((entry) => scoreQuote(entry.quote) >= 1)) break;
+  }
+
+  return decideTravelSupport(gathered, checked);
 }
 
 export interface ExtractedDates {
