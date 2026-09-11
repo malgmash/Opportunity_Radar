@@ -112,6 +112,12 @@ export function selectBoard(
       ),
       Math.round(limitPerKind * 0.25),
     );
+    // Curated entries exist because of their funding programs or regional
+    // relevance; a site the agent cannot read should not delete them.
+    take(
+      byPriority.filter((item) => item.source.id === "curated"),
+      Math.round(limitPerKind * 0.15),
+    );
     take(byPriority, limitPerKind);
 
     board.push(...items.filter((item) => picked.has(item.id)));

@@ -79,6 +79,24 @@ describe("selectBoard", () => {
     expect(ids).toContain("pycon");
   });
 
+  it("keeps curated entries whose sites could not be read", () => {
+    const online = Array.from({ length: 20 }, (_, index) =>
+      make(`online-${index}`, "Online", { score: 95 }),
+    );
+    const curated: Opportunity = {
+      ...make("tapia", "Rotating, United States", { score: 25, eligible: false }),
+      source: { id: "curated", name: "Curated series", url: "https://example.com" },
+      travel: {
+        status: "unknown",
+        evidence: [],
+        note: "Could not read the event site to check for travel funding.",
+      },
+    };
+
+    const board = selectBoard([...online, curated], DEFAULT_PROFILE, TODAY, 8);
+    expect(board.map((item) => item.id)).toContain("tapia");
+  });
+
   it("applies the limit per kind, not across the whole board", () => {
     const hackathons = Array.from({ length: 10 }, (_, index) =>
       make(`hack-${index}`, "Online"),
