@@ -1,7 +1,7 @@
 {
   "updated": "2026-09-13",
   "source": "MALG Assistant Opportunity Dropbox",
-  "count": 21,
+  "count": 43,
   "opportunities": [
     {
       "kind": "internship",
@@ -29,6 +29,31 @@
     },
     {
       "kind": "internship",
+      "title": "Software Engineer Intern, Summer 2027 \u2014 Anduril",
+      "organization": "Anduril Industries",
+      "url": "https://boards.greenhouse.io/andurilindustries/jobs/5148079007",
+      "description": "Pursuing bachelor\u2019s or master\u2019s in CS/SWE/Math/Physics/related; **must return to school after internship** for \u22651 quarter/semester (Class of 2029 OK); U.S. Person (export control) \u00b7 Paid \u00b7 Verified Greenhouse description: returning-to-school required. Prefer Atlanta or Reston for region.",
+      "locations": [
+        "Atlanta, GA; Reston, VA; plus Boston, Seattle, Costa Mesa/Irvine, CO sites (in-person)"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Summer 2027 \u2014 paid 12-week in-person internship",
+      "deadlineLabel": "Rolling / while live on Greenhouse",
+      "term": "Summer 2027 \u2014 paid 12-week in-person internship",
+      "reward": "Paid",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "software engineering"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://boards.greenhouse.io/andurilindustries/jobs/5148079007"
+      }
+    },
+    {
+      "kind": "internship",
       "title": "Boeing Summer 2027 Internship Program (Paid) \u2014 Data Analytics Intern",
       "organization": "Boeing",
       "url": "https://jobs.boeing.com/en/job/everett/boeing-summer-2027-internship-program-paid-data-analytics-intern/185/98720782192",
@@ -50,6 +75,130 @@
         "id": "malg-dropbox",
         "name": "MALG Opportunity Dropbox",
         "url": "https://jobs.boeing.com/en/job/everett/boeing-summer-2027-internship-program-paid-data-analytics-intern/185/98720782192"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "Software Engineer Intern, Summer 2027 \u2014 Booz Allen (Fayetteville, NC)",
+      "organization": "Booz Allen",
+      "url": "https://bah.wd1.myworkdayjobs.com/bah_jobs/job/Fayetteville-NC/University---Summer-2027--Software-Engineer-Intern_R0249225",
+      "description": "Bachelor\u2019s per SimplifyJobs listing; confirm citizenship/clearance notes on posting \u00b7 Paid \u00b7 Workday shell \u2014 open posting from listing; verify Class of 2029 eligibility on apply form.",
+      "locations": [
+        "Fayetteville, North Carolina"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Summer 2027",
+      "deadlineLabel": "While live on Workday",
+      "term": "Summer 2027",
+      "reward": "Paid",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "software engineering"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://bah.wd1.myworkdayjobs.com/bah_jobs/job/Fayetteville-NC/University---Summer-2027--Software-Engineer-Intern_R0249225"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "Data Scientist Intern, Summer 2027 \u2014 Cox (Atlanta, GA)",
+      "organization": "Cox",
+      "url": "https://cox.wd1.myworkdayjobs.com/Cox_External_Career_Site_1/job/Atlanta-GA/Data-Scientist-Intern---Summer-2027--Atlanta--GA-_R202682164",
+      "description": "Undergrad/grad data science track per title; verify year cutoffs on posting \u00b7 Paid \u00b7 Companion to Cox PM Atlanta listing.",
+      "locations": [
+        "Atlanta, Georgia"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Summer 2027",
+      "deadlineLabel": "While live on Workday",
+      "term": "Summer 2027",
+      "reward": "Paid",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "data"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://cox.wd1.myworkdayjobs.com/Cox_External_Career_Site_1/job/Atlanta-GA/Data-Scientist-Intern---Summer-2027--Atlanta--GA-_R202682164"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "Product Management Intern, Summer 2027 \u2014 Cox (Atlanta, GA)",
+      "organization": "Cox",
+      "url": "https://cox.wd1.myworkdayjobs.com/Cox_External_Career_Site_1/job/Atlanta-GA/Product-Management-Intern---Summer-2027--Atlanta--GA-_R202682174",
+      "description": "Bachelor\u2019s per SimplifyJobs listing \u00b7 Paid \u00b7 Atlanta GA location confirmed in listings JSON.",
+      "locations": [
+        "Atlanta, Georgia"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Summer 2027",
+      "deadlineLabel": "While live on Workday",
+      "term": "Summer 2027",
+      "reward": "Paid",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "product management"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://cox.wd1.myworkdayjobs.com/Cox_External_Career_Site_1/job/Atlanta-GA/Product-Management-Intern---Summer-2027--Atlanta--GA-_R202682174"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "Backend Services Programmer Intern \u2014 Epic Games Services (Cary, NC)",
+      "organization": "Epic Games",
+      "url": "https://epicgames.com/careers/jobs/6183293004?gh_jid=6183293004",
+      "description": "Java/OOP proficiency; must be legally authorized to work at host location for internship duration; no explicit grad-year cutoff in Greenhouse content \u00b7 Paid (Epic early career) \u00b7 Backend systems for Fortnite Online Game Services. See epicgames.com/earlycareers.",
+      "locations": [
+        "Cary, North Carolina"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Flexible start in 2027 (Simplify lists Summer 2027)",
+      "deadlineLabel": "Ongoing recruitment until team match",
+      "term": "Flexible start in 2027 (Simplify lists Summer 2027)",
+      "reward": "Paid (Epic early career)",
+      "tags": [
+        "malg-dropbox",
+        "internships"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://epicgames.com/careers/jobs/6183293004?gh_jid=6183293004"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "Software Engineer Intern, Winter 2027 \u2014 Figma",
+      "organization": "Figma",
+      "url": "https://job-boards.greenhouse.io/figma/jobs/6131089004",
+      "description": "No explicit grad-year cutoff in Greenhouse description; verify on apply \u00b7 Paid \u2014 **$55/hr** disclosed \u00b7 From vanshb03 community list. SF/NY hubs.",
+      "locations": [
+        "San Francisco, CA or New York, NY (hub)"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Winter 2027 \u2014 start ~January 4, 2027",
+      "deadlineLabel": "While live on Greenhouse",
+      "term": "Winter 2027 \u2014 start ~January 4, 2027",
+      "reward": "Paid \u2014 **$55/hr** disclosed",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "software engineering"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://job-boards.greenhouse.io/figma/jobs/6131089004"
       }
     },
     {
@@ -100,6 +249,56 @@
         "id": "malg-dropbox",
         "name": "MALG Opportunity Dropbox",
         "url": "https://careers.bu.edu/jobs/gallo-it-data-analyst-internship-2027/"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "Software Engineer Intern, Summer 2027 \u2014 Garmin (Cary, NC)",
+      "organization": "Garmin",
+      "url": "https://careers.garmin.com/jobs/20131?icims=1",
+      "description": "Bachelor\u2019s-track per SimplifyJobs listing (Software category); verify year cutoffs on posting \u00b7 Paid (typical Garmin intern) \u00b7 Listing active in SimplifyJobs JSON (Bachelor\u2019s, Summer 2027, Cary NC). Career page is JS-heavy \u2014 confirm eligibility details when applying.",
+      "locations": [
+        "Cary, North Carolina"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Summer 2027",
+      "deadlineLabel": "While live on Garmin careers",
+      "term": "Summer 2027",
+      "reward": "Paid (typical Garmin intern)",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "software engineering"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://careers.garmin.com/jobs/20131?icims=1"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "Data Analytics Intern, Summer 2027 \u2014 Genworth (Richmond, VA)",
+      "organization": "Genworth Financial",
+      "url": "https://gnw.wd1.myworkdayjobs.com/GNW/job/Richmond-Virginia/Data-Analytics-Intern---Summer-2027_REQ-260288-1",
+      "description": "Bachelor\u2019s per SimplifyJobs listing \u00b7 Paid \u00b7 Confirm graduation-year wording on Workday posting when applying.",
+      "locations": [
+        "Richmond, Virginia"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Summer 2027",
+      "deadlineLabel": "While live on Workday",
+      "term": "Summer 2027",
+      "reward": "Paid",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "data"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://gnw.wd1.myworkdayjobs.com/GNW/job/Richmond-Virginia/Data-Analytics-Intern---Summer-2027_REQ-260288-1"
       }
     },
     {
@@ -230,6 +429,31 @@
     },
     {
       "kind": "internship",
+      "title": "Software Engineer Intern, Summer 2027 \u2014 Peraton (VA)",
+      "organization": "Peraton",
+      "url": "https://careers-peraton.icims.com/jobs/169665/job",
+      "description": "Prefer rising junior/senior; **strong underclassmen may be considered**; bachelor\u2019s progress in CS/CE/related \u2014 Class of 2029 pathway OK \u00b7 Paid (intern rate) \u00b7 Complements existing Peraton Data Science intern file. No clearance required on posting snippet.",
+      "locations": [
+        "Herndon, VA; Blacksburg, VA"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Summer 2027",
+      "deadlineLabel": "While live (iCIMS)",
+      "term": "Summer 2027",
+      "reward": "Paid (intern rate)",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "software engineering"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://careers-peraton.icims.com/jobs/169665/job"
+      }
+    },
+    {
+      "kind": "internship",
       "title": "[Summer 2027] Product Management Intern \u2014 Roblox",
       "organization": "Roblox",
       "url": "https://careers.roblox.com/jobs/8143981",
@@ -280,6 +504,31 @@
     },
     {
       "kind": "internship",
+      "title": "Software Engineer Intern (Summer or Winter) \u2014 Stripe",
+      "organization": "Stripe",
+      "url": "https://stripe.com/jobs/search?gh_jid=8128745",
+      "description": "Bachelor\u2019s or Master\u2019s in CS/math/related; no explicit Class-of cutoff in Greenhouse excerpt \u00b7 Paid \u00b7 Summer 2026 term may be filled \u2014 prioritize Winter 2027 if offered. Cross-check story links from @zero2sudo.",
+      "locations": [
+        "Seattle, WA; San Francisco, CA; New York, NY"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Summer 2026 and/or Winter 2027 (per SimplifyJobs terms); Winter 2027 still relevant",
+      "deadlineLabel": "While live \u2014 promoted by @zero2sudo as apps LIVE",
+      "term": "Summer 2026 and/or Winter 2027 (per SimplifyJobs terms); Winter 2027 still relevant",
+      "reward": "Paid",
+      "tags": [
+        "malg-dropbox",
+        "internships",
+        "software engineering"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://stripe.com/jobs/search?gh_jid=8128745"
+      }
+    },
+    {
+      "kind": "internship",
       "title": "Software Engineer Intern (TikTok Developer Platform) \u2014 2027 Summer",
       "organization": "TikTok",
       "url": "https://lifeattiktok.com/search/7667935739300792629",
@@ -301,6 +550,29 @@
         "id": "malg-dropbox",
         "name": "MALG Opportunity Dropbox",
         "url": "https://lifeattiktok.com/search/7667935739300792629"
+      }
+    },
+    {
+      "kind": "conference",
+      "title": "All Things Open 2026 \u2014 Research Triangle (NC)",
+      "organization": "All Things Open",
+      "url": "https://2026.allthingsopen.org/",
+      "description": "Students / underrepresented applicants eligible for scholarships; educational discounts available \u00b7 Student & underrepresented scholarships + educational discounts (limited) \u00b7 Largest OSS/tech conference on U.S. East Coast. Volunteer CFP also open.",
+      "locations": [
+        "Research Triangle Park / Raleigh\u2013Durham area, North Carolina"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**October 19\u201320, 2026** (workshops/deep dives Mon 19; conference day Tue 20)",
+      "deadlineLabel": "Summer pricing extended through **September 18, 2026**; student scholarships via interest form",
+      "reward": "Student & underrepresented scholarships + educational discounts (limited)",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://2026.allthingsopen.org/"
       }
     },
     {
@@ -327,6 +599,29 @@
       }
     },
     {
+      "kind": "conference",
+      "title": "Clojure Conj 2026 \u2014 Charlotte, NC",
+      "organization": "Clojure Conj",
+      "url": "https://2026.clojure-conj.org",
+      "description": "Open registration \u00b7 In-region (NC) \u00b7 Niche functional-programming conference; good if exploring Clojure/FP.",
+      "locations": [
+        "Charlotte, North Carolina"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**September 30, 2026** (per conference-data; confirm end date on site)",
+      "deadlineLabel": "See 2026.clojure-conj.org",
+      "reward": "In-region (NC)",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://2026.clojure-conj.org"
+      }
+    },
+    {
       "kind": "hackathon",
       "title": "codeLinc 11 \u2014 Lincoln Financial & AWS",
       "organization": "Lincoln Financial Group / AWS",
@@ -347,6 +642,98 @@
         "id": "malg-dropbox",
         "name": "MALG Opportunity Dropbox",
         "url": "https://codelinc11.devpost.com/"
+      }
+    },
+    {
+      "kind": "conference",
+      "title": "DevNexus 2027 \u2014 Atlanta",
+      "organization": "Atlanta Java Users Group / DevNexus",
+      "url": "https://devnexus.com/",
+      "description": "Developers / students welcome (typical AJUG student rates historically) \u00b7 In-region (Atlanta) \u2014 stipend optional \u00b7 Largest U.S. Java ecosystem conference; AI/engineering tracks expanding.",
+      "locations": [
+        "Georgia World Congress Center, Atlanta, GA"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**April 5\u20137, 2027**",
+      "deadlineLabel": "Registration opens closer to event \u2014 watch devnexus.com",
+      "reward": "In-region (Atlanta) \u2014 stipend optional",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://devnexus.com/"
+      }
+    },
+    {
+      "kind": "conference",
+      "title": "Enterprise AI Summit \u2014 Charlotte, NC",
+      "organization": "IT Revolution",
+      "url": "https://events.itrevolution.com/2026-charlotte/",
+      "description": "Open / professionals + students (confirm rates) \u00b7 In-region (NC) \u00b7 From confs.tech / tech-conferences conference-data.",
+      "locations": [
+        "Charlotte, North Carolina"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**October 7\u20138, 2026**",
+      "deadlineLabel": "See event site registration",
+      "reward": "In-region (NC)",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://events.itrevolution.com/2026-charlotte/"
+      }
+    },
+    {
+      "kind": "hackathon",
+      "title": "Girls Hoo Hack 2026 \u2014 Charlottesville, VA",
+      "organization": "Girls Hoo Hack / UVA / MLH",
+      "url": "https://www.mlh.io/seasons/2027/events",
+      "description": "Gender-inclusive women-centered hackathon (typical past years); undergrad welcome \u00b7 In-region (VA); confirm travel policy on event site \u00b7 Listed on live MLH 2027 season page. Event site returned thin HTML from this egress \u2014 recheck girlshoohack.com for apply link.",
+      "locations": [
+        "Charlottesville, Virginia, US"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**October 17\u201318, 2026** (per MLH 2027 season schedule)",
+      "deadlineLabel": "Watch MLH / girlshoohack.com for apps",
+      "reward": "In-region (VA); confirm travel policy on event site",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://www.mlh.io/seasons/2027/events"
+      }
+    },
+    {
+      "kind": "conference",
+      "title": "Grace Hopper Celebration (GHC) 2026 \u2014 Anaheim",
+      "organization": "AnitaB.org",
+      "url": "https://ghc.anitab.org/",
+      "description": "Women and allies in computing; students strongly encouraged \u00b7 AnitaB academic/partner scholarships historically available \u2014 **confirm current student travel/scholarship before committing** (out-of-region requires funding) \u00b7 Kept because curated nationals list + typical scholarship paths. Do not book travel until funding confirmed.",
+      "locations": [
+        "Anaheim Convention Center, Anaheim, CA"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**October 27\u201330, 2026**",
+      "deadlineLabel": "Registration open on ghc.anitab.org; watch Academic / scholarship programs",
+      "reward": "AnitaB academic/partner scholarships historically available \u2014 **confirm current student travel/scholarship before committing** (out-of-region requires funding)",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://ghc.anitab.org/"
       }
     },
     {
@@ -488,6 +875,75 @@
       }
     },
     {
+      "kind": "conference",
+      "title": "KubeCon + CloudNativeCon North America 2026",
+      "organization": "CNCF / Linux Foundation",
+      "url": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america-2026/",
+      "description": "Open source / cloud-native community; diversity + need-based scholarship categories \u00b7 **LF Registration Scholarships + Travel Funding** (coach airfare + lodging assistance when approved) \u2014 qualifies under out-of-region travel-funded rule \u00b7 confs.tech briefly listed wrong city/dates; live site confirms Salt Lake City Nov 9\u201312, 2026. Apply for scholarships/travel before registering if needed.",
+      "locations": [
+        "Salt Lake City, Utah (Salt Palace)"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**November 9\u201312, 2026**",
+      "deadlineLabel": "LF Registration Scholarships + Travel Fund \u2014 check attend nav on event site (deadlines vary)",
+      "reward": "**LF Registration Scholarships + Travel Funding** (coach airfare + lodging assistance when approved) \u2014 qualifies under out-of-region travel-funded rule",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://events.linuxfoundation.org/kubecon-cloudnativecon-north-america-2026/"
+      }
+    },
+    {
+      "kind": "conference",
+      "title": "RenderATL 2027 \u2014 Atlanta",
+      "organization": "RenderATL",
+      "url": "https://www.renderatl.com/",
+      "description": "Open registration; career fair / builders focus \u00b7 In-region (Atlanta); watch for student/community discounts \u00b7 2026 edition already passed (Aug 12\u201313, 2026). Tracking 2027 dates from live site.",
+      "locations": [
+        "Atlanta, GA (230 John Portman Blvd NW Building 2)"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**August 18\u201319, 2027** (+ Atlanta Tech Week side events)",
+      "deadlineLabel": "Tickets on sale via renderatl.com",
+      "reward": "In-region (Atlanta); watch for student/community discounts",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://www.renderatl.com/"
+      }
+    },
+    {
+      "kind": "conference",
+      "title": "CMD-IT Tapia Conference 2026 \u2014 Atlanta",
+      "organization": "CMD-IT / Tapia",
+      "url": "https://tapiaconference.cmd-it.org/",
+      "description": "Undergrad/grad students and professionals in computing \u00b7 Student scholarships historically cover registration + travel + hotel (deadlines mostly passed); **in-region (Atlanta)** so included regardless \u00b7 Focus themes: Frontier AI, Assistive Technologies, Cybersecurity. Urgent if still registering.",
+      "locations": [
+        "Hyatt Regency Atlanta, Georgia"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "**September 16\u201318, 2026**",
+      "deadlineLabel": "Main student scholarship deadline was earlier (Mar 2026); registration may still be open \u2014 check site ASAP",
+      "reward": "Student scholarships historically cover registration + travel + hotel (deadlines mostly passed); **in-region (Atlanta)** so included regardless",
+      "tags": [
+        "malg-dropbox",
+        "hackathons_conferences"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://tapiaconference.cmd-it.org/"
+      }
+    },
+    {
       "kind": "hackathon",
       "title": "VTHacks 14 \u2014 Virginia Tech",
       "organization": "VTHacks / Virginia Tech / MLH",
@@ -508,6 +964,80 @@
         "id": "malg-dropbox",
         "name": "MALG Opportunity Dropbox",
         "url": "https://vthacks.com/"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "@zero2sudo \u2014 Adobe Student Insiders 2026\u20132027",
+      "organization": "@zero2sudo \u2192 Adobe",
+      "url": "https://event.adobe.com/insiders-summit-26",
+      "description": "Students networking with Adobe product teams \u00b7 Program / event dependent \u00b7 Networking pipeline into Adobe internships. Confirm whether application window still open.",
+      "locations": [
+        "Program / summit (see Adobe event link)"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "2026\u20132027 Student Insiders cycle",
+      "deadlineLabel": "Caption said apps close in 3 days at time of post (may be closed \u2014 recheck)",
+      "term": "2026\u20132027 Student Insiders cycle",
+      "reward": "Program / event dependent",
+      "tags": [
+        "malg-dropbox",
+        "from_instagram"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://event.adobe.com/insiders-summit-26"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "@zero2sudo \u2014 Google / Stripe / Microsoft 2027 SWE apps LIVE",
+      "organization": "@zero2sudo (Sudomarith)",
+      "url": "https://www.google.com/about/careers/applications/jobs/results/100648618540573382-software-engineering-intern-bs-summer-2027",
+      "description": "See each company file \u00b7 n/a \u00b7 Caption: \u201cGoogle, Stripe, Microsoft 2027 SWE apps are LIVE\u2026 links on my story.\u201d Verified/seeded: Google BS Summer 2027 (internships/), Stripe Summer/Winter (internships/stripe-swe-intern-summer-or-winter.md). Microsoft US Summer 2027 Explore/SWE: still no clean Class-of-2029-confirmed US posting found beyond Winter/CTJ variants \u2014 follow Stories.",
+      "locations": [
+        "n/a (social post)"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "Public caption mirrored on Socialpruf (scan day 2026-09-13)",
+      "deadlineLabel": "See company postings / Stories",
+      "term": "Public caption mirrored on Socialpruf (scan day 2026-09-13)",
+      "reward": "n/a",
+      "tags": [
+        "malg-dropbox",
+        "from_instagram",
+        "software engineering"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://www.google.com/about/careers/applications/jobs/results/100648618540573382-software-engineering-intern-bs-summer-2027"
+      }
+    },
+    {
+      "kind": "internship",
+      "title": "@zero2sudo \u2014 NVIDIA Ignite SWE Internship update",
+      "organization": "@zero2sudo (Sudomarith)",
+      "url": "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite",
+      "description": "Verify on NVIDIA careers (Ignite often frosh/soph oriented \u2014 good for Class of 2029) \u00b7 Paid if selected \u00b7 Caption says NVIDIA opened SWE / Hardware / Business Ops internship apps and interviewing started. Search Ignite + Software on NVIDIA Workday; confirm undergrad year bands before applying.",
+      "locations": [
+        "n/a"
+      ],
+      "datesConfirmed": true,
+      "dateLabel": "~1 month before scan (Socialpruf \u201c1mo ago\u201d)",
+      "deadlineLabel": "NVIDIA Ignite / university recruiting portals \u2014 rolling",
+      "term": "~1 month before scan (Socialpruf \u201c1mo ago\u201d)",
+      "reward": "Paid if selected",
+      "tags": [
+        "malg-dropbox",
+        "from_instagram",
+        "software engineering"
+      ],
+      "source": {
+        "id": "malg-dropbox",
+        "name": "MALG Opportunity Dropbox",
+        "url": "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite"
       }
     }
   ]
