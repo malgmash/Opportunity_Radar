@@ -161,6 +161,9 @@ panel in the UI is a live view of these stages.
 | [confs.tech](https://github.com/tech-conferences/conference-data) | Conferences | Open dataset, filtered to relevant topics |
 | Curated series list | Conferences | Recurring Southeast events plus national conferences with student travel funding programs |
 | [@zero2sudo](https://www.instagram.com/zero2sudo/) on Instagram | Internships, hackathons, conferences | Alert account; captions are parsed into per-company leads |
+| [MALG Opportunity Dropbox](data/malg-dropbox-feed.json) | Internships, hackathons, conferences | External curated feed at `data/malg-dropbox-feed.json`, updated by MALG Assistant and ingested on each scan |
+
+`data/malg-dropbox-feed.json` is a committed JSON feed (not runtime state — that lives in gitignored `.data/`). MALG Assistant writes DraftOpportunity-shaped rows into it; the `malg-dropbox` source reads the file from the repo root on every collect pass and skips malformed entries.
 
 #### Instagram alert accounts
 
@@ -238,6 +241,7 @@ src/instrumentation.ts  starts the loop with the server
 src/app/api/          run, schedule, cron, notifications, profile and state endpoints
 src/components/       dashboard UI
 scripts/run-agent.ts  headless run, with --watch
+data/                 committed feeds the agent reads (e.g. malg-dropbox-feed.json)
 tests/                rules, geography, date-parsing and schedule tests
 ```
 
